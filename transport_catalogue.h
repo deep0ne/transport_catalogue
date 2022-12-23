@@ -8,47 +8,21 @@
 #include <functional>
 
 #include "geo.h"
+#include "domain.h"
 
 namespace catalogue{
 class Transport {
 public:
-    struct Bus;
-
-    struct PtrComp {
-        bool operator()(const Bus* lhs, const Bus* rhs) const {
-            return lhs->bus_name < rhs->bus_name;
-        }
-    };
-
-    struct Stop {
-        std::string stop_name;
-        detail::Coordinates coords;
-        std::set<Bus*, PtrComp> buses;
-
-    };
-
-    class StopHasher {
-    public:
-        size_t operator() (std::pair<Stop*, Stop*> val) const {
-            return std::hash<const void*>()(val.first) ^ std::hash<const void*>()(val.second);
-        }
-    };
     
-    struct Bus {
-        std::string bus_name;
-        std::vector<Stop*> paths;
-        double distance = 0;
-        double curvature = 0;
-    };
+    void AddBus(std::string& bus_name, std::vector<std::string>& bus_stops, bool& round_trip);
+    void AddStop(Stop& stop);
+    void AddDistance(const std::string& stop1, const std::string& stop2, double distance);
     
-    void AddBus(std::string& bus);
-    void AddStop(std::string& stop);
-    void AddDistance(std::string& stop);
-    
-    Bus* FindPath(std::string_view name);
-    Stop* FindStop(std::string_view stop);
+    Bus* FindPath(std::string_view name) const;
+    Stop* FindStop(std::string_view stop) const;
 
-    void GetAllInfo(std::string_view bus);
+    std::deque<Stop> GetStops() const;
+    std::deque<Bus> GetBuses() const;
 
 private:
     std::deque<Stop> stops_;
